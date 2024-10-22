@@ -1,5 +1,5 @@
 ### Install command 
-pip install -r requirements/common.txt && pip install -r requirements/dev.txt
+`pip install -r requirements/common.txt && pip install -r requirements/dev.txt`
 
 ### Jupyter 
 jupyter notebook
