@@ -4,8 +4,11 @@
 *.pyc
 __pycache__/
 local_settings.py
+*.sqlite3
 db.sqlite3
+media/
 media
+staticfiles/
 
 # Django REST framework
 *.pyc
@@ -34,12 +37,17 @@ src/node_modules
 web/static/CACHE
 stats
 
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
 # Virtual environment
 venv/
 env/
 
 # VS Code
 .vscode/*
+.history/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
