@@ -16,3 +16,6 @@ https://docs.sleeper.com/
 League ID: 1049226125907603456
 
 User ID: 1130174389980434432
+
+URL TEST: 
+`http://127.0.0.1:8000/sleeper/league/1130174613243305984/`
