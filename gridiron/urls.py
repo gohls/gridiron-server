@@ -21,5 +21,5 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('sleeper/', include('sleeper.urls')),
+    path('api/sleeper/', include('sleeper.urls')),
 ]
