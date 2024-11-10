@@ -8,6 +8,7 @@ from sleeper.api_clients import sleeper_api
 
 class SleeperLeagueChampionAPI(APIView):
     def get(self, request, league_id: str) -> Response:
+        # Add logic to get league champ
         data = sleeper_api.get_league(league_id)
         if "error" in data:
             return Response(data, status=400)
