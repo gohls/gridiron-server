@@ -1,5 +1,5 @@
 import requests
-from . import constants
+from .. import constants
 
 def make_request(url: str) -> dict:
     try:
