@@ -1,0 +1,5 @@
+# I have to clean-up this dependencies mess
+-r requirements/common.txt
+-r requirements/dev.txt
+-r requirements/jupyter.txt
+-r requirements/prod.txt
