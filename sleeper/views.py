@@ -13,3 +13,10 @@ class SleeperLeagueChampionAPI(APIView):
         if "error" in data:
             return Response(data, status=400)
         return Response(data, status=200)
+    
+class SleeperTestAPI(APIView):
+    def get(self, request) -> Response:
+        data = {}
+        data['username'] = 'Joe Schmo'
+        data['display_name'] = 'The Ringer'
+        return Response(data, status=200)
