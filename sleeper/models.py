@@ -23,7 +23,7 @@ class SleeperLeague(models.Model):
     total_rosters = models.IntegerField(null=True, blank=True, help_text="Total number of rosters/teams in league")
     season = models.CharField(max_length=50, help_text="Year e.g. 2018, 2019, 2020, etc.")
     sport = models.CharField(max_length=50, help_text="nfl") # only support "nfl" right now
-    rulebook = models.ForeignKey(LeagueRulebook, related_query_name="sleeper_league")
+    rulebook = models.OneToOneField(LeagueRulebook, on_delete=models.CASCADE, related_query_name="sleeper_league")
 
     def __str__(self):
         return self.name

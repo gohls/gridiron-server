@@ -66,5 +66,5 @@ class RuleSubsection(models.Model):
     class Meta:
         ordering = ['order']
         constraints = [
-            UniqueConstraint(fields=['rulebook', 'order'], name='unique_rule_subsection')
+            UniqueConstraint(fields=['rule', 'order'], name='unique_rule_subsection')
         ]
