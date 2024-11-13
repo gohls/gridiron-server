@@ -38,6 +38,11 @@ class LeagueRulebook(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
 
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['content_type', 'object_id'], name='unique_league_rulebook')
+        ]
+
 
 class Rule(models.Model):
     rulebook = models.ForeignKey(LeagueRulebook, on_delete=models.CASCADE, related_name='rules')
