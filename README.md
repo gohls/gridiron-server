@@ -1,15 +1,4 @@
-# MAKE SURE TO DELETE SUPERUSER BEFORE PROD LAUNCH
---username admin 
---email admin@example.com
---password admin
 
-### Install command 
-`pip install -r requirements.txt` should install all the requirements. Need to clean this up
-
-### Jupyter 
-jupyter notebook
-
-Create Jupyter Notebook files within the `notebooks` directory for development and testing purposes.
 
 
 ### Sleeper Integration References
@@ -70,4 +59,12 @@ example rulebook request:
         }
     ]
 }
+```
 
+### Install command 
+`pip install -r requirements.txt` should install all the requirements. Need to clean this up
+
+### Jupyter 
+jupyter notebook
+
+Create Jupyter Notebook files within the `notebooks` directory for development and testing purposes.
