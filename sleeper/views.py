@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from sleeper.api_clients import sleeper_api
+from .api_clients import sleeper_api
 
 
 class SleeperLeagueChampionAPI(APIView):
