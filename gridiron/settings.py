@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 from datetime import timedelta
 
@@ -57,8 +58,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'corsheaders',
     'rest_framework',
+    'corsheaders',
     'knox',
     'core',
     'espn',
@@ -67,10 +68,10 @@ INSTALLED_APPS = [
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'core.authentication.KnoxCookieAuthentication',
+    ),
 }
-
-KNOX_TOKEN_TTL = timedelta(hours=10) 
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -158,3 +159,25 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+
+### Knox defaults
+
+# KNOX_TOKEN_MODEL = 'knox.AuthToken'
+
+# REST_KNOX = {
+#   'SECURE_HASH_ALGORITHM': 'hashlib.sha512',
+#   'AUTH_TOKEN_CHARACTER_LENGTH': 64,
+#   'TOKEN_TTL': timedelta(hours=10),
+#   'USER_SERIALIZER': 'knox.serializers.UserSerializer',
+#   'TOKEN_LIMIT_PER_USER': None,
+#   'AUTO_REFRESH': False,
+#   'AUTO_REFRESH_MAX_TTL': None,
+#   'MIN_REFRESH_INTERVAL': 60,
+#   'AUTH_HEADER_PREFIX': 'Token',
+#   'EXPIRY_DATETIME_FORMAT': api_settings.DATETIME_FORMAT,
+#   'TOKEN_MODEL': 'knox.AuthToken',
+# }
+
+
+# Set to True in production
+SESSION_COOKIE_SECURE = not DEBUG
