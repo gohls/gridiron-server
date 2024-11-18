@@ -27,14 +27,17 @@ SECRET_KEY = "django-insecure-eo)cb7sbppceq&mf!%#*e^1$vzfc)^aogi1+n@&d@m_w21w7fh
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+
+# DEBUG settings
+ALLOWED_HOSTS = ["*"]
+CORS_ALLOW_METHODS = ["*"]
+CORS_ALLOW_ALL_ORIGINS = False 
+CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
-
-CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -69,7 +72,7 @@ INSTALLED_APPS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'core.authentication.KnoxCookieAuthentication',
+        'knox.auth.TokenAuthentication',
     ),
 }
 

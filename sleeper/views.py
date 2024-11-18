@@ -1,14 +1,14 @@
 from typing import Any
 
-from django.shortcuts import render
-from django.shortcuts import get_object_or_404
-
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
-from .api_clients import sleeper_api
+from knox.auth import TokenAuthentication
+
+from sleeper.api_clients import sleeper_api
 
 
 class SleeperLeagueChampionAPI(APIView):
@@ -35,6 +35,10 @@ class SleeperLeagueChampionAPI(APIView):
 
     
 class SleeperTestAPI(APIView):
+    # for testing purposes
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
     def get(self, request) -> Response:
         data = {}
         data['username'] = 'Joe Schmo'
