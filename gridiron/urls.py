@@ -24,7 +24,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('api/auth/', include('knox.urls')),
     path('api/auth/signup/', core_views.SignUpView.as_view(), name='user-signup'),
-    path('api/auth/signin/', core_views.LoginView.as_view(), name='user-signin'),
+    path('api/auth/login/', core_views.LoginView.as_view(), name='user-login'),
     path('api/auth/logout/', core_views.LogoutView.as_view(), name='user-logout'),
     path('api/auth/logout-all/', core_views.LogoutAllView.as_view(), name='logout-all'),
     path('api/auth/status/', core_views.AuthStatusView.as_view(), name='auth-status'),
