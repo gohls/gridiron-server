@@ -10,7 +10,7 @@ from knox.views import LogoutView as KnoxLogoutView
 from knox.views import LogoutAllView as KnoxLogoutAllView
 from knox.auth import TokenAuthentication
 
-from core.serializers import SignUpSerializer, LoginSerializer
+from core.serializers import SignUpSerializer, SignInSerializer
 
 
 class SignUpView(generics.CreateAPIView):
@@ -34,25 +34,29 @@ class SignUpView(generics.CreateAPIView):
             "token": token,
         }, status=status.HTTP_201_CREATED)
 
-class LoginView(KnoxLoginView):
+
+class SignInView(KnoxLoginView):
+    authentication_classes = ()
     permission_classes = (AllowAny,)
 
     def post(self, request, format=None):
-        serializer = LoginSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        login(request, user)
-        return super(LoginView, self).post(request, format=None)
+        serializer = SignInSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            login(request, user)
+            return super(SignInView, self).post(request, format=None)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400)
 
-class LogoutView(KnoxLogoutView):
+class SignOutView(KnoxLogoutView):
     pass
 
-class LogoutAllView(KnoxLogoutAllView):
+class SignOutAllView(KnoxLogoutAllView):
     pass
 
 class AuthStatusView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request):
         user = request.user
