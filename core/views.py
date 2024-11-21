@@ -10,11 +10,12 @@ from knox.views import LogoutView as KnoxLogoutView
 from knox.views import LogoutAllView as KnoxLogoutAllView
 from knox.auth import TokenAuthentication
 
-from core.serializers import SignUpSerializer, SignInSerializer
+from core.serializers import PlatformUserSerializer, SignUpSerializer, SignInSerializer
 
 
 class SignUpView(generics.CreateAPIView):
-    permission_classes = [AllowAny]
+    authentication_classes = ()
+    permission_classes = (AllowAny,)
     serializer_class = SignUpSerializer
 
     def create(self, request, *args, **kwargs):
@@ -24,13 +25,11 @@ class SignUpView(generics.CreateAPIView):
         login(request, user)
         _, token = AuthToken.objects.create(user)
 
+        user_data = PlatformUserSerializer(user).data
+
         return Response({
-            "message": "User sign up successfully",
-            "user": {
-                "id": user.id,
-                "username": user.username,
-                "email": user.email,
-            },
+            "isAuthenticated": True,
+            "user": user_data,
             "token": token,
         }, status=status.HTTP_201_CREATED)
 
@@ -44,9 +43,18 @@ class SignInView(KnoxLoginView):
         if serializer.is_valid():
             user = serializer.validated_data['user']
             login(request, user)
-            return super(SignInView, self).post(request, format=None)
+            _, token = AuthToken.objects.create(user)
+
+            user_data = PlatformUserSerializer(user).data
+
+            return Response({
+                "isAuthenticated": True,
+                "user": user_data,
+                "token": token,
+            }, status=status.HTTP_200_OK)
         else:
-            return Response(serializer.errors, status=status.HTTP_400)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class SignOutView(KnoxLogoutView):
     pass
@@ -60,11 +68,11 @@ class AuthStatusView(APIView):
 
     def get(self, request):
         user = request.user
+        _, token = AuthToken.objects.create(user)
+        user_data = PlatformUserSerializer(user).data
+
         return Response({
             'isAuthenticated': True,
-            'user': {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email,
-            }
+            'user': user_data,
+            "token": token,
         }, status=status.HTTP_200_OK)

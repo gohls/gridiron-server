@@ -11,6 +11,7 @@ class SleeperUser(models.Model):
     user_id = models.CharField(max_length=100, unique=True)
     username = models.CharField(max_length=100)
     display_name = models.CharField(max_length=100)
+    avatar = models.CharField(max_length=100) # sleeper avatar id
 
     def __str__(self):
         return self.display_name

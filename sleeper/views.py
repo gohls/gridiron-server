@@ -10,38 +10,65 @@ from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
 
 from core.models import PlatformUser
+from core.serializers import PlatformUserSerializer
 from sleeper.api_clients import sleeper_api
 from sleeper.models import SleeperUser
 from sleeper.serializers import SleeperUserSerializer
 
 
-class SleeperUserSetupView(APIView):
+class SleeperUserFetchView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    
-    def post(self, request, username: str) -> Response:
-        platform_user = get_object_or_404(PlatformUser, user=request.user)
 
-        # Check if the SleeperUser already exists
-        sleeper_user = SleeperUser.objects.filter(username=username).first()
-        if sleeper_user:
+    def post(self, request) -> Response:
+        username = request.data.get('username')
+
+        if not username:
+            return Response({"error": "Username is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            sleeper_user = request.user.sleeper_user
             serializer = SleeperUserSerializer(sleeper_user)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        
-        # If not found, call the Sleeper API
-        sleeper_use_data = sleeper_api.get_user(username)
-        # If no sleeper user 
-        if not sleeper_use_data:
-            return Response(tatus=status.HTTP_204_NO_CONTENT)
+        except SleeperUser.DoesNotExist:
+            sleeper_user_data = sleeper_api.get_user(username)
 
-        sleeper_use_data['platform_user'] = platform_user.id  # Add platform_user to the data
+            if not sleeper_user_data:
+                return Response({"error": "Sleeper user not found in the Sleeper API."}, status=status.HTTP_404_NOT_FOUND)
+
+            sleeper_user_data['platform_user'] = request.user.id
+            serializer = SleeperUserSerializer(data=sleeper_user_data)
+            serializer.is_valid(raise_exception=True)
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class SleeperUserCreateView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        username = request.data.get('username')
+        if not username:
+            return Response({"error": "Username is required."}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Validate and save the new data
-        serializer = SleeperUserSerializer(data=sleeper_use_data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        try:
+            sleeper_user = request.user.sleeper_user
+            serializer = SleeperUserSerializer(sleeper_user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except SleeperUser.DoesNotExist:
+            sleeper_user_data = sleeper_api.get_user(username)
+            if not sleeper_user_data:
+                return Response({"error": "User not found in Sleeper API."}, status=status.HTTP_404_NOT_FOUND)
+
+            sleeper_user_data['platform_user'] = request.user.id
+            serializer = SleeperUserSerializer(data=sleeper_user_data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 
 
