@@ -1,6 +1,7 @@
 from typing import Any
-
+from django.db import transaction
 from django.shortcuts import get_object_or_404
+
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,11 +10,9 @@ from rest_framework.permissions import IsAuthenticated
 
 from knox.auth import TokenAuthentication
 
-from core.models import PlatformUser
-from core.serializers import PlatformUserSerializer
 from sleeper.api_clients import sleeper_api
-from sleeper.models import SleeperUser
-from sleeper.serializers import SleeperUserSerializer
+from sleeper.models import SleeperLeague, SleeperUser
+from sleeper.serializers import SleeperLeagueSerializer, SleeperLeagueTeamSerializer, SleeperUserSerializer
 
 
 class SleeperUserFetchView(APIView):
@@ -41,6 +40,9 @@ class SleeperUserFetchView(APIView):
             serializer.is_valid(raise_exception=True)
 
             return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class SleeperUserCreateView(APIView):
@@ -68,17 +70,52 @@ class SleeperUserCreateView(APIView):
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
 
-
-
-
-class SleeperLeagueSetupView(APIView):
+class SleeperUserLeaguesFetchView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request, league_id: str) -> Response:
-       
-        return Response(status=status.HTTP_200_OK)
+    @transaction.atomic
+    def post(self, request) -> Response:
+        try:
+            sleeper_user = request.user.sleeper_user
+            user_leagues = SleeperLeague.objects.filter(sleeperleagueteam__owner=sleeper_user)
+            serializer = SleeperLeagueSerializer(user_leagues, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except SleeperUser.DoesNotExist:
+            sleeper_user_leagues_data = sleeper_api.get_user_leagues(request.user.platform_user.sleeper_user.user_id)
+            if not sleeper_user_leagues_data:
+                return Response({"error": "User leagues not found in Sleeper API."}, status=status.HTTP_404_NOT_FOUND)
+
+            saved_leagues = []
+            with transaction.atomic():
+                for league_data in sleeper_user_leagues_data:
+                    
+                    league_serializer = SleeperLeagueSerializer(data=league_data)
+                    if league_serializer.is_valid():
+                        league = league_serializer.save()
+                        
+                        team_data = {
+                            'owner': sleeper_user.id,
+                            'league': league.id,
+                            'metadata': league_data.get('metadata', {})
+                        }
+                        team_serializer = SleeperLeagueTeamSerializer(data=team_data)
+                        if team_serializer.is_valid():
+                            team_serializer.save()
+                        
+                        saved_leagues.append(league_serializer.data)
+                    else:
+                        # Raising an exception will cause a rollback
+                        raise ValueError(f"Validation error for league: {league_serializer.errors}")
+
+            return Response(saved_leagues, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 class SleeperLeagueSetupView(APIView):
     def post(self, request, league_id: str) -> Response:
