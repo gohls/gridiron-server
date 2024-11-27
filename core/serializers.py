@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import (
+from core.models import (
     PlatformUser, 
 )
 
@@ -17,6 +17,12 @@ class SignUpSerializer(serializers.ModelSerializer):
         model = PlatformUser
         fields = ('id', 'username', 'email', 'password')
         extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        user = PlatformUser(**validated_data)
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
 
 
 class SignInSerializer(serializers.Serializer):
