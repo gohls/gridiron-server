@@ -41,10 +41,9 @@ class SignUpView(generics.CreateAPIView):
 class SignInView(KnoxLoginView):
     authentication_classes = ()
     permission_classes = (AllowAny,)
-    serializer_class = SignInSerializer
 
     def post(self, request, format=None):
-        serializer = self.get_serializer(data=request.data)
+        serializer = SignInSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
             _, token = AuthToken.objects.create(user)
