@@ -18,20 +18,24 @@ class SignUpView(generics.CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = SignUpSerializer
 
-    def create(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        login(request, user)
-        _, token = AuthToken.objects.create(user)
+        if serializer.is_valid():
+            user = serializer.save()
+            _, token = AuthToken.objects.create(user)
 
-        user_data = PlatformUserSerializer(user).data
+            user_data = SignUpSerializer(user).data
 
-        return Response({
-            "isAuthenticated": True,
-            "user": user_data,
-            "token": token,
-        }, status=status.HTTP_201_CREATED)
+            return Response({
+                "isAuthenticated": True,
+                "user": user_data,
+                "token": token,
+            }, status=status.HTTP_201_CREATED)
+        else:
+            return Response({
+                "errors": serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class SignInView(KnoxLoginView):
@@ -42,7 +46,6 @@ class SignInView(KnoxLoginView):
         serializer = SignInSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
-            login(request, user)
             _, token = AuthToken.objects.create(user)
 
             user_data = PlatformUserSerializer(user).data
@@ -53,14 +56,19 @@ class SignInView(KnoxLoginView):
                 "token": token,
             }, status=status.HTTP_200_OK)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                "isAuthenticated": False,
+                "errors": serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SignOutView(KnoxLogoutView):
     pass
 
+
 class SignOutAllView(KnoxLogoutAllView):
     pass
+
 
 class AuthStatusView(APIView):
     authentication_classes = (TokenAuthentication,)
