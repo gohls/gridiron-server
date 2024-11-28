@@ -181,6 +181,3 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 #   'TOKEN_MODEL': 'knox.AuthToken',
 # }
 
-
-# Set to True in production
-SESSION_COOKIE_SECURE = not DEBUG
