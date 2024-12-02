@@ -10,6 +10,7 @@ class PlatformUser(AbstractUser):
     # Override the email field to make it required
     ## Dont want to make this required while developing atm
     #email = models.EmailField(unique=True, blank=False, null=False)
+    is_public = models.BooleanField(default=False)
 
     def __str__(self):
         return self.username
